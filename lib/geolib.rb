@@ -5,30 +5,91 @@ require 'geolib/geonames'
 require 'geolib/google'
 require 'geolib/mapit'
 require 'geolib/utils'
-
-require 'json'
+require 'geolib/hostip'
+require 'geolib/lru_cache'
 
 module Geolib
 
-  def self.map(provider,*args)
-    if provider == :openstreetmap
-      Geolib::OpenStreetMap.new()
+  def self.caching(obj)
+    # this is too simple to really help us much,
+    # we should probably be using memcache or redis
+    return SimpleCache.new(obj)
+  end
+
+  @@default_map_provider = caching(OpenStreetMap.new())
+  @@default_locations    = caching(Geonames.new())
+  @@default_ip_mapper    = caching(Hostip.new())
+  @@default_gazeteer     = caching(Mapit.new())
+
+  # I think we could do this with mattr_ in rails
+  # but I'll do it manually to avoid having to 
+  # depend on activesupport
+  [ :default_map_provider, 
+    :default_locations, 
+    :default_ip_mapper, 
+    :default_gazeteer].each do |sym|
+    
+    class_eval <<-EOS, __FILE__, __LINE__
+      def self.#{sym}
+        @@#{sym}
+      end
+
+      def self.#{sym}=(obj,cache=true)
+        obj = caching(obj) if cache
+        @@#{sym} = obj
+      end
+    EOS
+  end
+
+  # Given a latitude and longitude, return
+  # a place name appropriate for displaying to
+  # the user, for example:
+  # 
+  # nearest_place_name(51.476,0) might return "Greenwich"
+  #
+  def nearest_place_name(lat,lon)
+    default_locations.nearest_place_name(lat,lon)
+  end
+
+  # Return an iso country code for a given lat, lon
+  def lat_lon_to_country(lat,lon)
+    default_locations.lat_lon_to_country(lat,lon)
+  end
+
+  # Provide the URL for a static map, parameters are normalised
+  # between providers:
+  # 
+  #   :w, :h     - width and height of the image
+  #   :z         - zoom level of the image
+  #   :marker_lat, :marker_lon - optional marker co-ords
+  #
+  def map_img(lat,lon,options={})
+    default_map_provider.map_img(lat,lon,options)
+  end
+
+  # Return a lat/lon pair for a given ip address
+  def remote_location(ip_address)
+    default_ip_mapper.remote_location(ip_address)
+  end
+
+  # Similar to map_img call, but generates a URL
+  # to a page containing a map. Also, accepts
+  # a provider argument that allows one to specify 
+  # different services.
+  #
+  def link_to_map(lat,lon,options={})
+    provider = options.delete(:provider)
+    provider = case provider
+    when :openstreetmap
+      OpenStreetMap.new()
+    when :google
+      Google.new()
     else
-      Geolib::Google.new()
+      default_map_provider
     end
+    provider.link_to_map(lat,lon,options)
   end
 
-  def self.locations
-    Geolib::Geonames.new()
-  end
-
-  def self.gazetteer
-    Geolib::Mapit.new()
-  end
-
-  def self.ip_locator
-    Geolib::Hostip.new()
-  end
 
   class FuzzyPoint
     accuracies = [:point,:postcode,:ward,:council,:nation,:country]
@@ -39,8 +100,8 @@ module Geolib
       @lon,@lat,@accuracy = lon, lat, accuracy
     end
 
-    def to_json
-      {:lat=>lat,:lon=>lon,:accuracy=>accuracy}.to_json
+    def to_hash
+      {:lat=>lat,:lon=>lon,:accuracy=>accuracy}
     end
   end
 
@@ -63,7 +124,7 @@ module Geolib
 
     def to_hash
       {
-        :fuzzy_point => {:lat=>51,:lon=>0,:accuracy=>:postcode}
+        :fuzzy_point => {:lat=>51,:lon=>0,:accuracy=>:postcode},
         :country => "UK",
         :nation  => "E",
         :council => { :id => 2493, :name => "Greenwich Borough Council", :type => "LBO" },
@@ -83,6 +144,8 @@ module Geolib
 
   end
 
+  extend self
+    
 end
 
  
