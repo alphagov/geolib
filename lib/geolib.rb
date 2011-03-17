@@ -113,7 +113,7 @@ module Geolib
     attr_accessor :point,:postcode,:ward,:council,:nation,:country,:wmc
     attr_accessor :fuzzy_point
 
-    def initialize(fields)
+    def initialize()
       # first time we create something, we might
       # well only have the ip_address
       if fields[:ip_address]
@@ -121,7 +121,11 @@ module Geolib
       end
     end
 
-    def self.from_hash(json)
+    def self.new_from_ip(ip_address)
+      #
+    end
+
+    def self.new_from_hash(json)
       # do something
     end
 

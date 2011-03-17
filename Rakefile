@@ -4,12 +4,9 @@ require "rubygems"
 require "rake/gempackagetask"
 require "rake/rdoctask"
 require "rake/testtask"
+require "rspec/core/rake_task"
 
-Rake::TestTask.new do |t|
-  t.libs << "test"
-  t.test_files = FileList["test/**/*_test.rb"]
-  t.verbose = true
-end
+RSpec::Core::RakeTask.new :spec
 
 namespace :test do
   desc "Run tests with all available Ruby interpreters"
@@ -17,17 +14,16 @@ namespace :test do
   task :versions do |t|
     # Kind of re-entrant, but it shouldn't matter too much
     rubies = `rvm list strings`.split("\n")
-    system "rvm #{rubies.join(",")} rake test"
+    system "rvm #{rubies.join(",")} rake spec"
   end
 end
 
-task :default => ["test"]
+task :default => ["spec"]
 
 spec = Gem::Specification.load('geolib.gemspec')
 
 Rake::GemPackageTask.new(spec) do
 end
-
 
 Rake::RDocTask.new do |rd|
   rd.rdoc_files.include("lib/**/*.rb")
