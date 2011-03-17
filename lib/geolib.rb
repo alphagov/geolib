@@ -56,6 +56,18 @@ module Geolib
     default_locations.lat_lon_to_country(lat,lon)
   end
 
+
+  def map_provider(options)
+    provider = options.delete(:provider)
+    case provider
+    when :openstreetmap
+      OpenStreetMap.new()
+    when :google
+      Google.new()
+    else
+      default_map_provider
+    end
+  end
   # Provide the URL for a static map, parameters are normalised
   # between providers:
   # 
@@ -64,7 +76,7 @@ module Geolib
   #   :marker_lat, :marker_lon - optional marker co-ords
   #
   def map_img(lat,lon,options={})
-    default_map_provider.map_img(lat,lon,options)
+    map_provider(options).map_img(lat,lon,options)
   end
 
   # Return a lat/lon pair for a given ip address
@@ -77,17 +89,8 @@ module Geolib
   # a provider argument that allows one to specify 
   # different services.
   #
-  def link_to_map(lat,lon,options={})
-    provider = options.delete(:provider)
-    provider = case provider
-    when :openstreetmap
-      OpenStreetMap.new()
-    when :google
-      Google.new()
-    else
-      default_map_provider
-    end
-    provider.link_to_map(lat,lon,options)
+  def map_href(lat,lon,options={})
+    map_provider(options).map_href(lat,lon,options)
   end
 
 

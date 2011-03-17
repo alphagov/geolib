@@ -45,7 +45,7 @@ module Geolib
     end
     
     def method_missing(m, *args)
-      arg_key = args.sort.inspect
+      arg_key = args.inspect
       cache_key = "#{m}--#{arg_key}"
       if @cache[cache_key]
         return @cache[cache_key] 

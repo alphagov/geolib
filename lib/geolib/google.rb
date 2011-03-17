@@ -28,7 +28,7 @@ module Geolib
     end
 
 
-    def link_to_map(lat,lon,options = {})
+    def map_href(lat,lon,options = {})
       g_options = {
         :z => options[:z] || 14,
         :ie => "UTF8",

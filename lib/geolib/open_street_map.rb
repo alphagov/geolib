@@ -27,7 +27,7 @@ module Geolib
       "#{@url}/StaticMap?#{params}"
     end
 
-    def link_to_map(lat,long,options = {})
+    def map_href(lat,long,options = {})
       options = {
         :zoom => options[:z] || 14,
         :lat => lat,
