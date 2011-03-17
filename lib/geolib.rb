@@ -57,6 +57,15 @@ module Geolib
   end
 
 
+  def centre_of_country(country_code)
+    default_locations.centre_of_country(country_code)
+  end
+
+  def areas_for_stack_from_postcode(postcode)
+    default_gazeteer.areas_for_stack_from_postcode(postcode)
+  end
+
+
   def map_provider(options)
     provider = options.delete(:provider)
     case provider
@@ -95,17 +104,16 @@ module Geolib
 
 
   class FuzzyPoint
-    accuracies = [:point,:postcode,:ward,:council,:nation,:country]
+    ACCURACIES = [:point,:postcode,:ward,:council,:nation,:country,:planet]
     attr_reader :lon, :lat, :accuracy
 
-    def initialize(lon,lat,accuracy)
-      raise ValueError unless accuracies.include?(accuracy)
+
+    def initialize(lat,lon,accuracy)
+      accuracy = accuracy.to_sym
+      raise ValueError unless ACCURACIES.include?(accuracy)
       @lon,@lat,@accuracy = lon, lat, accuracy
     end
 
-    def to_hash
-      {:lat=>lat,:lon=>lon,:accuracy=>accuracy}
-    end
   end
 
   class GeoStack
@@ -114,40 +122,82 @@ module Geolib
     attr_accessor :fuzzy_point
 
     def initialize()
-      # first time we create something, we might
-      # well only have the ip_address
-      if fields[:ip_address]
-        # do something
+      yield self
+    end
+
+    def calculate_fuzzy_point
+      if self.country
+        country_centre = Geolib.centre_of_country(self.country)
+        FuzzyPoint.new(country_centre["lat"],country_centre["lon"],:country)
+      else
+        FuzzyPoint.new(0,0,:planet)
       end
     end
 
     def self.new_from_ip(ip_address)
-      #
-    end
-
-    def self.new_from_hash(json)
-      # do something
-    end
-
-    def to_hash
-      {
-        :fuzzy_point => {:lat=>51,:lon=>0,:accuracy=>:postcode},
-        :country => "UK",
-        :nation  => "E",
-        :council => { :id => 2493, :name => "Greenwich Borough Council", :type => "LBO" },
-        :ward    => { :id => 8365, :name => "Greenwich West", :type => "LBW" },
-        :wmc     => { :id=> 65837, :name => "Greenwich and Woolwich", :type => "WMC" },
-        :postcode => "SE10 8UG",
-        :point => { :lat=>"51.476441375971447", :lon => "-0.01587542101038760" }
-      }
-    end
-
-    def new_info_received(fields)
-      if fields[:postcode]
-        # compare to current info and change if necessary
+      remote_location = Geolib.remote_location(ip_address)
+      new() do |gs|
+        if remote_location
+          gs.country = remote_location['country']
+        end
+        gs.fuzzy_point = gs.calculate_fuzzy_point
       end
-      return self
     end
+
+    def self.new_from_hash(hash)
+      new() do |gs|
+        gs.set_fields(hash)
+        unless hash['fuzzy_point']
+          raise ArgumentError, "fuzzy point required"
+        end
+      end
+    end
+
+    def update(hash)
+      self.class.new() do |empty|
+        empty.set_fields(hash)
+        if hash['postcode']
+          empty.fetch_missing_fields(hash['postcode'])
+        end
+        empty.fuzzy_point = empty.calculate_fuzzy_point
+      end
+    end
+
+    def fetch_missing_fields(postcode)
+      if postcode.match(POSTCODE_REGEXP)
+        self.country = "UK"
+        set_fields(Geolib.areas_for_stack_from_postcode(postcode)) 
+      end
+    end
+
+    def set_fields(hash)
+      hash.each do |geo, value|
+        setter = (geo.to_s+"=").to_sym
+        if self.respond_to?(setter)
+          self.send(setter,value)
+        else
+          raise ArgumentError, "geo type '#{geo}' is not a valid geo type"
+        end
+      end
+      self
+    end
+
+    def fuzzy_point=(point)
+      if point.is_a?(Hash)
+        @fuzzy_point = FuzzyPoint.new(point["lat"],point["lon"],point["accuracy"])
+      else
+        @fuzzy_point = point
+      end
+    end
+
+    POSTCODE_REGEXP = /([A-Z]{1,2}[0-9R][0-9A-Z]?\s*[0-9])[ABD-HJLNP-UW-Z]{2}/i
+
+    def postcode=(postcode)
+      if (matches = postcode.match(POSTCODE_REGEXP))
+        @postcode = matches[1]
+      end
+    end
+
 
   end
 

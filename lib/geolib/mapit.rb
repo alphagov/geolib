@@ -38,10 +38,24 @@ module Geolib
     def respond_to?(sym)
       valid_mapit_methods.include?(sym) || super(sym)
     end
-    
+   
+    def areas_for_stack_from_postcode(postcode)
+      query = self.postcode(postcode)
+      results = {}
+      if query
+        query['shortcuts'].each do |typ,id|
+          results[typ.downcase.to_sym] = query['areas'][id.to_s].select {|k,v| ["name","id","type"].include?(k) }
+          results[:nation] = query['areas'][id.to_s]['country_name'] if results[:nation].nil?
+        end
+        lat,lon = query['wgs84_lat'],query['wgs84_lon']
+        results[:point] = {'lat' => lat, 'lon' => lon}
+      end
+      return results
+    end
+
     def method_missing(method, *args, &block)
       if valid_mapit_methods.include?(method)
-        Method.new(method.to_s,args).call(@base)
+        Mapit::Method.new(method.to_s,args).call(@base)
       else
         super(method, *args, &block)
       end
