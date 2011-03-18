@@ -115,7 +115,7 @@ describe Geolib::GeoStack do
       describe "when updated with a postcode" do
      
         before(:each) do
-          @new_stack = stack.update("postcode"=>"SE10 8UG")
+          @new_stack = stack.update("postcode"=>"SE108UG")
         end
 
         it "should calculate stack levels down to ward level" do
@@ -131,8 +131,11 @@ describe Geolib::GeoStack do
           @new_stack.postcode.should == "SE10 8"
         end
 
-        xit "should set fuzzy point to centroid of truncated postcode" do
-        
+        it "should set fuzzy point to centroid of truncated postcode" do
+          f = @new_stack.fuzzy_point
+          f.lon.should be_within(0.5).of(-0.024503132501)
+          f.lat.should be_within(0.5).of(51.4877939062)
+          f.accuracy.should == :postcode_district
         end
 
         it "should remove all other information" do

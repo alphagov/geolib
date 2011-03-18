@@ -53,6 +53,14 @@ module Geolib
       return results
     end
 
+    def centre_of_district(district_postcode)
+      query = self.postcode("partial",district_postcode)
+      if query
+        lat,lon = query['wgs84_lat'],query['wgs84_lon']
+        return {'lat' => lat, 'lon' => lon}
+      end
+    end
+
     def method_missing(method, *args, &block)
       if valid_mapit_methods.include?(method)
         Mapit::Method.new(method.to_s,args).call(@base)

@@ -61,6 +61,10 @@ module Geolib
     default_locations.centre_of_country(country_code)
   end
 
+  def centre_of_district(district_postcode)
+    default_gazeteer.centre_of_district(district_postcode)
+  end
+
   def areas_for_stack_from_postcode(postcode)
     default_gazeteer.areas_for_stack_from_postcode(postcode)
   end
@@ -104,7 +108,7 @@ module Geolib
 
 
   class FuzzyPoint
-    ACCURACIES = [:point,:postcode,:ward,:council,:nation,:country,:planet]
+    ACCURACIES = [:point,:postcode,:postcode_district,:ward,:council,:nation,:country,:planet]
     attr_reader :lon, :lat, :accuracy
 
 
@@ -126,12 +130,23 @@ module Geolib
     end
 
     def calculate_fuzzy_point
+
+      if self.postcode
+        district = postcode.split(" ")[0]
+        district_centre = Geolib.centre_of_district(district)
+        if district_centre
+          return FuzzyPoint.new(district_centre["lat"],district_centre["lon"],:postcode_district)
+        end
+      end
+
       if self.country
         country_centre = Geolib.centre_of_country(self.country)
-        FuzzyPoint.new(country_centre["lat"],country_centre["lon"],:country)
-      else
-        FuzzyPoint.new(0,0,:planet)
+        if country_centre
+          return FuzzyPoint.new(country_centre["lat"],country_centre["lon"],:country)
+        end
       end
+
+      FuzzyPoint.new(0,0,:planet)
     end
 
     def self.new_from_ip(ip_address)
@@ -164,7 +179,7 @@ module Geolib
     end
 
     def fetch_missing_fields(postcode)
-      if postcode.match(POSTCODE_REGEXP)
+      if matches = postcode.match(POSTCODE_REGEXP)
         self.country = "UK"
         set_fields(Geolib.areas_for_stack_from_postcode(postcode)) 
       end
@@ -190,11 +205,11 @@ module Geolib
       end
     end
 
-    POSTCODE_REGEXP = /([A-Z]{1,2}[0-9R][0-9A-Z]?\s*[0-9])[ABD-HJLNP-UW-Z]{2}/i
+    POSTCODE_REGEXP = /([A-Z]{1,2}[0-9R][0-9A-Z]?)\s*([0-9])[ABD-HJLNP-UW-Z]{2}/i
 
     def postcode=(postcode)
       if (matches = postcode.match(POSTCODE_REGEXP))
-        @postcode = matches[1]
+        @postcode = matches[1]+" "+matches[2]
       end
     end
 
