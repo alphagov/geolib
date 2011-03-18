@@ -68,7 +68,11 @@ module Geolib
   def areas_for_stack_from_postcode(postcode)
     default_gazeteer.areas_for_stack_from_postcode(postcode)
   end
-
+  
+  def lat_lon_from_postcode(postcode)
+    areas = default_gazeteer.areas_for_stack_from_postcode(postcode)
+    areas[:point]
+  end
 
   def map_provider(options)
     provider = options.delete(:provider)
