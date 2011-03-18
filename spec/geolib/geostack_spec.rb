@@ -123,7 +123,7 @@ describe Geolib::GeoStack do
             @new_stack.send(method).should == expected
           end
           {:wmc => 'Greenwich and Woolwich', :council => 'Greenwich Borough Council', :ward => 'Greenwich West'}.each do |method, expected|
-            @new_stack.send(method)['name'].should == expected
+            @new_stack.send(method)[0]['name'].should == expected
           end
         end
 
@@ -138,14 +138,10 @@ describe Geolib::GeoStack do
           f.accuracy.should == :postcode_district
         end
 
-        it "should remove all other information" do
-          
+        it "should have a friendly location name set" do
+          @new_stack.friendly_name.should == "Greenwich"
         end
 
       end
-
-      
   end
-
-
 end

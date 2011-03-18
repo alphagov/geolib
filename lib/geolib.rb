@@ -115,15 +115,19 @@ module Geolib
     def initialize(lat,lon,accuracy)
       accuracy = accuracy.to_sym
       raise ValueError unless ACCURACIES.include?(accuracy)
-      @lon,@lat,@accuracy = lon, lat, accuracy
+      @lon,@lat,@accuracy = lon.to_f, lat.to_f, accuracy
     end
 
+    def to_hash
+      {"lon"=> self.lon.to_s,"lat"=>self.lat.to_s,"accuracy"=>accuracy.to_s}
+    end
   end
 
   class GeoStack
 
-    attr_accessor :point,:postcode,:ward,:council,:nation,:country,:wmc
+    attr_accessor :postcode,:ward,:council,:nation,:country,:wmc
     attr_accessor :fuzzy_point
+    attr_accessor :friendly_name
 
     def initialize()
       yield self
@@ -131,7 +135,7 @@ module Geolib
 
     def calculate_fuzzy_point
 
-      if self.postcode
+      if self.postcode && self.postcode != ""
         district = postcode.split(" ")[0]
         district_centre = Geolib.centre_of_district(district)
         if district_centre
@@ -168,11 +172,25 @@ module Geolib
       end
     end
 
+    def to_hash
+      {
+        :fuzzy_point => self.fuzzy_point.to_hash,
+        :postcode => self.postcode,
+        :ward => self.ward,
+        :council => self.council,
+        :nation => self.nation,
+        :country => self.country,
+        :wmc => self.wmc,
+        :friendly_name => self.friendly_name
+      }.select {|k,v| !(v.nil?) }
+    end
+
     def update(hash)
       self.class.new() do |empty|
+        full_postcode = hash['postcode']
         empty.set_fields(hash)
-        if hash['postcode']
-          empty.fetch_missing_fields(hash['postcode'])
+        if full_postcode
+          empty.fetch_missing_fields(full_postcode)
         end
         empty.fuzzy_point = empty.calculate_fuzzy_point
       end
@@ -181,7 +199,14 @@ module Geolib
     def fetch_missing_fields(postcode)
       if matches = postcode.match(POSTCODE_REGEXP)
         self.country = "UK"
-        set_fields(Geolib.areas_for_stack_from_postcode(postcode)) 
+        fields = Geolib.areas_for_stack_from_postcode(postcode)
+        if fields
+          lat_lon = fields[:point]
+          if lat_lon
+            self.friendly_name = Geolib.nearest_place_name(lat_lon['lat'],lat_lon['lon'])
+          end
+          set_fields(fields.select {|k,v| k != :point})
+        end
       end
     end
 

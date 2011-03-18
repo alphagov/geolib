@@ -23,7 +23,7 @@ module Geolib
       def centre_of_country(country_code)
         params = { "country" => country_code, "type" => "JSON" }
         results = query("countryInfo",params)
-        if results && results["geonames"]
+        if results && results["geonames"] && results["geonames"][0]
           country = results["geonames"][0]
           bbe, bbw = country["bBoxEast"],country["bBoxWest"]
           bbn, bbs = country["bBoxNorth"],country["bBoxSouth"]

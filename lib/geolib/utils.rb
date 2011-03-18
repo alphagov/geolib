@@ -5,7 +5,6 @@ module Geolib
   
   def self.get(url)
     url = URI.parse(url) unless url.is_a? URI
-    puts url.request_uri
     response = Net::HTTP.start(url.host, url.port) { |http|
       request = Net::HTTP::Get.new(url.request_uri)
       http.request(request)

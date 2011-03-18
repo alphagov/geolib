@@ -42,10 +42,20 @@ module Geolib
     def areas_for_stack_from_postcode(postcode)
       query = self.postcode(postcode)
       results = {}
-      if query
+      if query && query['shortcuts'] && query['areas']
         query['shortcuts'].each do |typ,id|
-          results[typ.downcase.to_sym] = query['areas'][id.to_s].select {|k,v| ["name","id","type"].include?(k) }
-          results[:nation] = query['areas'][id.to_s]['country_name'] if results[:nation].nil?
+          if id.is_a? Hash
+            ids = id.values()
+          else
+            ids = [id]
+          end
+          ids.each do |id|
+            area_info =  query['areas'][id.to_s]
+            level = typ.downcase.to_sym
+            results[level] = [] unless results[level]
+            results[level] << area_info.select {|k,v| ["name","id","type"].include?(k) }
+            results[:nation] = area_info['country_name'] if results[:nation].nil?
+          end
         end
         lat,lon = query['wgs84_lat'],query['wgs84_lon']
         results[:point] = {'lat' => lat, 'lon' => lon}
