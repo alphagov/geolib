@@ -10,6 +10,7 @@ module Geolib
     def remote_location(ip_address)
       params = {:ip => ip_address, :position => true} 
       results = Geolib.get(@url + "?" + Geolib.hash_to_params(params))
+      return nil if results.nil?
       response = YAML.load(results + "\n")
       location = {}.tap do |h|
         h["lat"] = response['Latitude']
