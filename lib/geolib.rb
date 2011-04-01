@@ -69,6 +69,10 @@ module Geolib
     default_gazeteer.areas_for_stack_from_postcode(postcode)
   end
   
+  def areas_for_stack_from_coords(lon, lat)
+    default_gazeteer.areas_for_stack_from_coords(lon, lat)
+  end
+  
   def lat_lon_from_postcode(postcode)
     areas = default_gazeteer.areas_for_stack_from_postcode(postcode)
     areas[:point]
@@ -129,7 +133,7 @@ module Geolib
 
   class GeoStack
 
-    attr_accessor :postcode,:ward,:council,:nation,:country,:wmc
+    attr_accessor :postcode,:ward,:council,:nation,:country,:wmc,:lat,:lon
     attr_accessor :fuzzy_point
     attr_accessor :friendly_name
 
@@ -138,7 +142,10 @@ module Geolib
     end
 
     def calculate_fuzzy_point
-
+      if self.lat and self.lon
+        return FuzzyPoint.new(self.lat, self.lon, :point)
+      end
+      
       if self.postcode && self.postcode != ""
         district = postcode.split(" ")[0]
         district_centre = Geolib.centre_of_district(district)
@@ -194,13 +201,15 @@ module Geolib
         full_postcode = hash['postcode']
         empty.set_fields(hash)
         if full_postcode
-          empty.fetch_missing_fields(full_postcode)
+          empty.fetch_missing_fields_for_postcode(full_postcode)
+        elsif hash['lon'] and hash['lat']
+          empty.fetch_missing_fields_for_coords(hash['lon'], hash['lat'])
         end
         empty.fuzzy_point = empty.calculate_fuzzy_point
       end
     end
 
-    def fetch_missing_fields(postcode)
+    def fetch_missing_fields_for_postcode(postcode)
       if matches = postcode.match(POSTCODE_REGEXP)
         self.country = "UK"
         fields = Geolib.areas_for_stack_from_postcode(postcode)
@@ -211,6 +220,14 @@ module Geolib
           end
           set_fields(fields.select {|k,v| k != :point})
         end
+      end
+    end
+    
+    def fetch_missing_fields_for_coords(lon, lat)
+      fields = Geolib.areas_for_stack_from_coords(lon, lat)
+      if ['England', 'Scotland', 'Northern Ireland', 'Wales'].include?(fields[:nation])
+        self.country = 'UK'
+        set_fields(fields.select {|k,v| k != :point})
       end
     end
 
