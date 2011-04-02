@@ -200,10 +200,10 @@ module Geolib
       self.class.new() do |empty|
         full_postcode = hash['postcode']
         empty.set_fields(hash)
-        if full_postcode
-          empty.fetch_missing_fields_for_postcode(full_postcode)
-        elsif hash['lon'] and hash['lat']
+        if hash['lon'] and hash['lat']
           empty.fetch_missing_fields_for_coords(hash['lat'], hash['lon'])
+        elsif full_postcode
+          empty.fetch_missing_fields_for_postcode(full_postcode)
         end
         empty.fuzzy_point = empty.calculate_fuzzy_point
       end
