@@ -69,8 +69,8 @@ module Geolib
     default_gazeteer.areas_for_stack_from_postcode(postcode)
   end
   
-  def areas_for_stack_from_coords(lon, lat)
-    default_gazeteer.areas_for_stack_from_coords(lon, lat)
+  def areas_for_stack_from_coords(lat, lon)
+    default_gazeteer.areas_for_stack_from_coords(lat, lon)
   end
   
   def lat_lon_from_postcode(postcode)
@@ -203,7 +203,7 @@ module Geolib
         if full_postcode
           empty.fetch_missing_fields_for_postcode(full_postcode)
         elsif hash['lon'] and hash['lat']
-          empty.fetch_missing_fields_for_coords(hash['lon'], hash['lat'])
+          empty.fetch_missing_fields_for_coords(hash['lat'], hash['lon'])
         end
         empty.fuzzy_point = empty.calculate_fuzzy_point
       end
@@ -223,8 +223,9 @@ module Geolib
       end
     end
     
-    def fetch_missing_fields_for_coords(lon, lat)
-      fields = Geolib.areas_for_stack_from_coords(lon, lat)
+    def fetch_missing_fields_for_coords(lat, lon)
+      self.friendly_name = Geolib.nearest_place_name(lat, lon)
+      fields = Geolib.areas_for_stack_from_coords(lat, lon)
       if ['England', 'Scotland', 'Northern Ireland', 'Wales'].include?(fields[:nation])
         self.country = 'UK'
         set_fields(fields.select {|k,v| k != :point})

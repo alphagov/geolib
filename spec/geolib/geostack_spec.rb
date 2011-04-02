@@ -4,66 +4,66 @@ require 'geolib'
 describe Geolib::GeoStack do
 
     
-  # describe "a stack created from an ip address" do
-  #     
-  #       it "should have a country if possible" do
-  #         stub_locator = mock()
-  #         stub_locator.expects(:centre_of_country).with('US').returns({"lat"=>37,"lon"=>-96})
-  #         Geolib.stubs(:default_locations).returns(stub_locator)
-  #         stub_mapper = stub(:remote_location => {'country' => 'US'})
-  #         Geolib.expects(:default_ip_mapper).returns(stub_mapper)
-  # 
-  #         stack = Geolib::GeoStack.new_from_ip('173.203.129.90')
-  #         stack.country.should == "US"
-  #         stack.fuzzy_point.lon.should be_within(0.5).of(-96)
-  #         stack.fuzzy_point.lat.should be_within(0.5).of(37)
-  #         stack.fuzzy_point.accuracy.should == :country
-  #       end
-  # 
-  #       it "should be specific if no country available" do
-  #         stub_mapper = mock()
-  #         stub_mapper.expects(:remote_location).with('127.0.0.1').returns(nil)
-  #         Geolib.stubs(:default_ip_mapper).returns(stub_mapper)
-  #         stack = Geolib::GeoStack.new_from_ip('127.0.0.1')
-  #         stack.country.should be_nil
-  #         stack.fuzzy_point.lon.should == 0
-  #         stack.fuzzy_point.lat.should == 0
-  #         stack.fuzzy_point.accuracy.should == :planet
-  #       end
-  # 
-  #   end
-  # 
-  # describe "a stack created from an existing hash" do
-  #     
-  #     it "should only have known params" do
-  #       lambda { Geolib::GeoStack.new_from_hash("galaxy" => "Andromeda") }.should raise_error(ArgumentError)
-  #     end
-  # 
-  #     it "should refuse creation if no fuzzy point" do
-  #       lambda { Geolib::GeoStack.new_from_hash("country" => "US") }.should raise_error(ArgumentError)
-  #     end
-  # 
-  #     it "should always truncate postcode" do
-  #       stack = Geolib::GeoStack.new_from_hash("postcode"=>"SE10 8UG","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})
-  #       stack.postcode.should == "SE10 8"
-  #     end
-  # 
-  #     it "should ignore invalid postcodes" do
-  #       stack = Geolib::GeoStack.new_from_hash("postcode"=>"NOTAPOSTCODE","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})
-  #       stack.postcode.should be_nil
-  #     end
-  # 
-  #  end
-  # 
-  # describe "a stack with accuracy of postcode" do
-  # 
-  #   describe "when updated with different country" do
-  #     
-  #     xit "should remove all other fields" do
-  #     end
-  # 
-  #   end
-  # end
+  describe "a stack created from an ip address" do
+      
+        it "should have a country if possible" do
+          stub_locator = mock()
+          stub_locator.expects(:centre_of_country).with('US').returns({"lat"=>37,"lon"=>-96})
+          Geolib.stubs(:default_locations).returns(stub_locator)
+          stub_mapper = stub(:remote_location => {'country' => 'US'})
+          Geolib.expects(:default_ip_mapper).returns(stub_mapper)
+  
+          stack = Geolib::GeoStack.new_from_ip('173.203.129.90')
+          stack.country.should == "US"
+          stack.fuzzy_point.lon.should be_within(0.5).of(-96)
+          stack.fuzzy_point.lat.should be_within(0.5).of(37)
+          stack.fuzzy_point.accuracy.should == :country
+        end
+  
+        it "should be specific if no country available" do
+          stub_mapper = mock()
+          stub_mapper.expects(:remote_location).with('127.0.0.1').returns(nil)
+          Geolib.stubs(:default_ip_mapper).returns(stub_mapper)
+          stack = Geolib::GeoStack.new_from_ip('127.0.0.1')
+          stack.country.should be_nil
+          stack.fuzzy_point.lon.should == 0
+          stack.fuzzy_point.lat.should == 0
+          stack.fuzzy_point.accuracy.should == :planet
+        end
+  
+    end
+  
+  describe "a stack created from an existing hash" do
+      
+      it "should only have known params" do
+        lambda { Geolib::GeoStack.new_from_hash("galaxy" => "Andromeda") }.should raise_error(ArgumentError)
+      end
+  
+      it "should refuse creation if no fuzzy point" do
+        lambda { Geolib::GeoStack.new_from_hash("country" => "US") }.should raise_error(ArgumentError)
+      end
+  
+      it "should always truncate postcode" do
+        stack = Geolib::GeoStack.new_from_hash("postcode"=>"SE10 8UG","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})
+        stack.postcode.should == "SE10 8"
+      end
+  
+      it "should ignore invalid postcodes" do
+        stack = Geolib::GeoStack.new_from_hash("postcode"=>"NOTAPOSTCODE","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})
+        stack.postcode.should be_nil
+      end
+  
+   end
+  
+  describe "a stack with accuracy of postcode" do
+  
+    describe "when updated with different country" do
+      
+      xit "should remove all other fields" do
+      end
+  
+    end
+  end
 
   describe "a stack with an accuracy of country" do
       
@@ -163,6 +163,10 @@ describe Geolib::GeoStack do
           f.lon.should == -0.015875421010387608
           f.lat.should == 51.476441375971447
           f.accuracy.should == :point
+        end
+
+        it "should have a friendly location name set" do
+          @new_stack.friendly_name.should == "Greenwich"
         end
       end
   end

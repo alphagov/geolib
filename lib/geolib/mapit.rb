@@ -54,7 +54,7 @@ module Geolib
       end
     end
 
-    def areas_for_stack_from_coords(lon, lat)
+    def areas_for_stack_from_coords(lat, lon)
       query = self.point("4326", [lon,lat])
       results = {:point => {'lat' => lat, 'lon' => lon}}
       query.each do |id,area_info|
