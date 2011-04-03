@@ -146,7 +146,7 @@ module Geolib
         return FuzzyPoint.new(self.lat, self.lon, :point)
       end
       
-      if self.postcode && self.postcode != ""
+      if self.postcode
         district = postcode.split(" ")[0]
         district_centre = Geolib.centre_of_district(district)
         if district_centre
@@ -200,13 +200,17 @@ module Geolib
       self.class.new() do |empty|
         full_postcode = hash['postcode']
         empty.set_fields(hash)
-        if hash['lon'] and hash['lat']
+        if has_valid_lat_lon(hash) 
           empty.fetch_missing_fields_for_coords(hash['lat'], hash['lon'])
         elsif full_postcode
           empty.fetch_missing_fields_for_postcode(full_postcode)
         end
         empty.fuzzy_point = empty.calculate_fuzzy_point
       end
+    end
+
+    def has_valid_lat_lon(hash)
+       return (hash['lon'] and hash['lat'] and hash['lon'] != "" and hash['lat'] != "")
     end
 
     def fetch_missing_fields_for_postcode(postcode)
@@ -236,7 +240,9 @@ module Geolib
       hash.each do |geo, value|
         setter = (geo.to_s+"=").to_sym
         if self.respond_to?(setter)
-          self.send(setter,value)
+          unless value == ""
+            self.send(setter,value)
+          end
         else
           raise ArgumentError, "geo type '#{geo}' is not a valid geo type"
         end
