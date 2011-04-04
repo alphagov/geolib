@@ -18,4 +18,8 @@ Gem::Specification.new do |s|
   s.test_files    = Dir['spec/**/*']
   s.executables   = []
   s.require_paths = ["lib"]
+  
+  s.add_development_dependency 'rake', '~> 0.8.0'
+  s.add_development_dependency 'mocha', '~> 0.9.0'
+  s.add_development_dependency 'rspec', '~> 2.5.0'
 end
