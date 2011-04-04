@@ -6,4 +6,4 @@ group :development, :test do
   gem 'rspec'
 end
 
-gemspec :name => 'geolib.gemspec'
+gemspec :name => 'geolib'
