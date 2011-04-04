@@ -1,10 +1,8 @@
 source "http://rubygems.org"
 
-
-group :development, :test do
-  gem 'rake'
-  gem 'mocha'
-  gem 'rspec'
-end
+# dev deps...
+gem 'rake'
+gem 'mocha'
+gem 'rspec'
 
 gemspec :name => 'geolib'
