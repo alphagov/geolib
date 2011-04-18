@@ -28,8 +28,8 @@ module Geolib
       end
     end
 
-    def initialize(base="http://mapit.mysociety.org")
-      @base = base
+    def initialize
+      @base = Geolib.default_geolib_provider
     end
 
     def valid_mapit_methods

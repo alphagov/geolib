@@ -16,15 +16,17 @@ module Geolib
     return SimpleCache.new(obj)
   end
 
+  @@default_geolib_provider = "http://mapit.alphagov.co.uk"
   @@default_map_provider = caching(OpenStreetMap.new())
   @@default_locations    = caching(Geonames.new())
   @@default_ip_mapper    = caching(Hostip.new())
-  @@default_gazeteer     = caching(Mapit.new())
+  @@default_gazeteer     = false 
 
   # I think we could do this with mattr_ in rails
   # but I'll do it manually to avoid having to 
   # depend on activesupport
-  [ :default_map_provider, 
+  [ :default_geolib_provider,
+    :default_map_provider, 
     :default_locations, 
     :default_ip_mapper, 
     :default_gazeteer].each do |sym|
@@ -40,6 +42,10 @@ module Geolib
       end
     EOS
   end
+  
+  # We have to do this after the accessors are defined as a new mapit instance
+  # now depends on the existence of Geolib.default_geolib_provider
+  @@default_gazeteer = caching(Mapit.new())
 
   # Given a latitude and longitude, return
   # a place name appropriate for displaying to
@@ -200,7 +206,7 @@ module Geolib
       self.class.new() do |empty|
         full_postcode = hash['postcode']
         empty.set_fields(hash)
-        if hash['lon'] and hash['lat']
+        if hash['lon'] and hash['lat'] and hash['lon'] != '' and hash['lat'] != ''
           empty.fetch_missing_fields_for_coords(hash['lat'], hash['lon'])
         elsif full_postcode
           empty.fetch_missing_fields_for_postcode(full_postcode)
