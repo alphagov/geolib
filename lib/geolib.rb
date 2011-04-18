@@ -39,7 +39,7 @@ module Geolib
   
   # We have to do this after the accessors are defined as a new mapit instance
   # now depends on the existence of Geolib.default_geolib_provider
-  @@default_geolib_provider = "http://mapit.alphagov.co.uk"
+  @@default_geolib_provider = "http://mapit.mysociety.org"
   @@default_map_provider = caching(OpenStreetMap.new())
   @@default_locations    = caching(Geonames.new())
   @@default_ip_mapper    = caching(Hostip.new())
