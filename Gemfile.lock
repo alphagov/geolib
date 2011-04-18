@@ -23,6 +23,6 @@ PLATFORMS
 
 DEPENDENCIES
   geolib!
-  mocha
-  rake
-  rspec
+  mocha (~> 0.9.0)
+  rake (~> 0.8.0)
+  rspec (~> 2.5.0)

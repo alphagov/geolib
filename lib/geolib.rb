@@ -15,12 +15,6 @@ module Geolib
     # we should probably be using memcache or redis
     return SimpleCache.new(obj)
   end
-
-  @@default_geolib_provider = "http://mapit.alphagov.co.uk"
-  @@default_map_provider = caching(OpenStreetMap.new())
-  @@default_locations    = caching(Geonames.new())
-  @@default_ip_mapper    = caching(Hostip.new())
-  @@default_gazeteer     = false
   
   # I think we could do this with mattr_ in rails
   # but I'll do it manually to avoid having to 
