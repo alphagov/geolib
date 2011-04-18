@@ -13,7 +13,7 @@ module Geolib
       def nearest_place_name(lat,lon)
         params = { "lat" => lat, "lng" => lon}
         results = query("findNearbyPlaceNameJSON",params)
-        if results
+        if results && results["geonames"]
           return results["geonames"][0]["name"]
         else
           return nil

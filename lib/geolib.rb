@@ -20,8 +20,8 @@ module Geolib
   @@default_map_provider = caching(OpenStreetMap.new())
   @@default_locations    = caching(Geonames.new())
   @@default_ip_mapper    = caching(Hostip.new())
-  @@default_gazeteer     = false 
-
+  @@default_gazeteer     = false
+  
   # I think we could do this with mattr_ in rails
   # but I'll do it manually to avoid having to 
   # depend on activesupport
@@ -45,6 +45,10 @@ module Geolib
   
   # We have to do this after the accessors are defined as a new mapit instance
   # now depends on the existence of Geolib.default_geolib_provider
+  @@default_geolib_provider = "http://mapit.alphagov.co.uk"
+  @@default_map_provider = caching(OpenStreetMap.new())
+  @@default_locations    = caching(Geonames.new())
+  @@default_ip_mapper    = caching(Hostip.new())
   @@default_gazeteer = caching(Mapit.new())
 
   # Given a latitude and longitude, return
@@ -152,7 +156,7 @@ module Geolib
         return FuzzyPoint.new(self.lat, self.lon, :point)
       end
       
-      if self.postcode && self.postcode != ""
+      if self.postcode
         district = postcode.split(" ")[0]
         district_centre = Geolib.centre_of_district(district)
         if district_centre
@@ -206,13 +210,17 @@ module Geolib
       self.class.new() do |empty|
         full_postcode = hash['postcode']
         empty.set_fields(hash)
-        if hash['lon'] and hash['lat'] and hash['lon'] != '' and hash['lat'] != ''
+        if has_valid_lat_lon(hash) 
           empty.fetch_missing_fields_for_coords(hash['lat'], hash['lon'])
         elsif full_postcode
           empty.fetch_missing_fields_for_postcode(full_postcode)
         end
         empty.fuzzy_point = empty.calculate_fuzzy_point
       end
+    end
+
+    def has_valid_lat_lon(hash)
+       return (hash['lon'] and hash['lat'] and hash['lon'] != "" and hash['lat'] != "")
     end
 
     def fetch_missing_fields_for_postcode(postcode)
@@ -242,7 +250,9 @@ module Geolib
       hash.each do |geo, value|
         setter = (geo.to_s+"=").to_sym
         if self.respond_to?(setter)
-          self.send(setter,value)
+          unless value == ""
+            self.send(setter,value)
+          end
         else
           raise ArgumentError, "geo type '#{geo}' is not a valid geo type"
         end
