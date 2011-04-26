@@ -133,8 +133,8 @@ describe Geolib::GeoStack do
       
         it "should set fuzzy point to centroid of truncated postcode" do
           f = @new_stack.fuzzy_point
-          f.lon.should be_within(0.5).of(-0.024503132501)
-          f.lat.should be_within(0.5).of(51.4877939062)
+          f.lon.should be_within(0.001).of(-0.024503132501)
+          f.lat.should be_within(0.001).of(51.4877939062)
           f.accuracy.should == :postcode_district
         end
       
@@ -160,8 +160,8 @@ describe Geolib::GeoStack do
 
         it "should set fuzzy point precisely" do
           f = @new_stack.fuzzy_point
-          f.lon.should == -0.015875421010387608
-          f.lat.should == 51.476441375971447
+          f.lon.should == -0.020
+          f.lat.should == 51.480
           f.accuracy.should == :point
         end
 
