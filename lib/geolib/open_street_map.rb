@@ -19,7 +19,7 @@ module Geolib
       
       if options[:marker_lat] && options[:marker_lon]
         options[:mlat0] = options.delete(:marker_lat)
-        options[:mlon0] = options.delete(:marker_lat)
+        options[:mlon0] = options.delete(:marker_lon)
       end
       
       params = Geolib.hash_to_params(options)
@@ -37,7 +37,7 @@ module Geolib
       
       if options[:marker_lat] && options[:marker_lon]
         options[:mlat0] = options.delete(:marker_lat)
-        options[:mlon0] = options.delete(:marker_lat)
+        options[:mlon0] = options.delete(:marker_lon)
       end
       
       params = Geolib.hash_to_params(options)

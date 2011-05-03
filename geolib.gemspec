@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
   s.name        = "geolib"
-  s.version     = "0.8.1"
+  s.version     = "0.8.2"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Ben Griffiths"]
   s.email       = ["bengriffiths@gmail.com"]
