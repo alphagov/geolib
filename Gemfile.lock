@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    geolib (0.0.1)
+    geolib (0.8.1)
 
 GEM
   remote: http://rubygems.org/

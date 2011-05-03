@@ -144,6 +144,19 @@ describe Geolib::GeoStack do
       
       end
 
+      describe "when updated with a too-long postcode" do
+           
+        before(:each) do
+          @new_stack = stack.update("postcode"=>"SE108BUG")
+        end
+      
+        it "should be effectively empty" do
+          f = @new_stack.fuzzy_point
+          f.accuracy.should == :planet
+        end
+      
+      end
+
       describe "when updated with a longitude and latitude" do
         before(:each) do
           @new_stack = stack.update("lon"=>"-0.015875421010387608", "lat"=>"51.476441375971447")
