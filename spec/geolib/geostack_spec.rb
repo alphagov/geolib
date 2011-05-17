@@ -47,6 +47,11 @@ describe Geolib::GeoStack do
         stack = Geolib::GeoStack.new_from_hash("postcode"=>"SE10 8UG","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})
         stack.postcode.should == "SE10 8"
       end
+      
+      it "should not consider a postcode with trailing whitespace invalid" do
+        stack = Geolib::GeoStack.new_from_hash("postcode"=>"SE10 8UG ","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})
+        stack.postcode.should == "SE10 8"
+      end
   
       it "should ignore invalid postcodes" do
         stack = Geolib::GeoStack.new_from_hash("postcode"=>"NOTAPOSTCODE","country" => "UK","fuzzy_point" => {"lat"=>"37","lon"=>"-96","accuracy"=>"postcode"})

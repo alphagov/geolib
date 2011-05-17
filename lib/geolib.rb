@@ -270,6 +270,7 @@ module Geolib
     SECTOR_POSTCODE_REGEXP =  /^([A-Z]{1,2}[0-9R][0-9A-Z]?)\s*([0-9])$/i
 
     def postcode=(postcode)
+      postcode.strip!
       if (matches = (postcode.match(POSTCODE_REGEXP) || postcode.match(SECTOR_POSTCODE_REGEXP)))
         @postcode = matches[1]+" "+matches[2]
       end
