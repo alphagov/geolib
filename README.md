@@ -1,3 +1,7 @@
+# DEPRECATED
+
+This repository is no longer maintained.
+
 # Geolib
 
 Geolib is a library of utilities for interacting with geographical services
